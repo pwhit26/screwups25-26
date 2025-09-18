@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp (name = "testConnect")
-public class testConnect extends LinearOpMode {
+@TeleOp (name = "zeroServo")
+public class zeroServo extends LinearOpMode {
     private Servo servo;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -15,6 +15,11 @@ public class testConnect extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.a) {
                 servo.setPosition(1);
+                telemetry.addData("Servo Position: ", servo.getPosition());
+                telemetry.update();
+            }
+            else if (gamepad1.b) {
+                servo.setPosition(0);
                 telemetry.addData("Servo Position: ", servo.getPosition());
                 telemetry.update();
             }
