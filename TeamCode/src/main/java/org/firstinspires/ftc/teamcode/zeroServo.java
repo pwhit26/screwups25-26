@@ -6,21 +6,28 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp (name = "zeroServo")
 public class zeroServo extends LinearOpMode {
-    private Servo servo;
+    private Servo servo1;
+    private Servo servo2;
     @Override
     public void runOpMode() throws InterruptedException {
-        servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(0);
+        servo1 = hardwareMap.get(Servo.class, "servo1");
+        servo1.setPosition(0);
+        servo2 = hardwareMap.get(Servo.class, "servo1");
+        servo2.setPosition(0);
         waitForStart();
         while (opModeIsActive()) {
             if (gamepad1.a) {
-                servo.setPosition(1);
-                telemetry.addData("Servo Position: ", servo.getPosition());
+                servo1.setPosition(1);
+                telemetry.addData("Servo Position: ", servo1.getPosition());
+                servo2.setPosition(1);
+                telemetry.addData("Servo Position: ", servo2.getPosition());
                 telemetry.update();
             }
             else if (gamepad1.b) {
-                servo.setPosition(0);
-                telemetry.addData("Servo Position: ", servo.getPosition());
+                servo1.setPosition(0);
+                telemetry.addData("Servo Position: ", servo1.getPosition());
+                servo2.setPosition(0);
+                telemetry.addData("Servo Position: ", servo2.getPosition());
                 telemetry.update();
             }
         }
