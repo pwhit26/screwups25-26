@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import pedroPathing.constants.FConstants;
@@ -18,13 +19,17 @@ import pedroPathing.constants.LConstants;
 public class baseTele extends LinearOpMode {
     private Follower follower;
     private final Pose startPose = new Pose(0,0,0);
-    private DcMotor frontRight, frontLeft, backRight, backLeft, intake, turret;
-    private Servo arm, indexer, turnTurret, angleTurret1, angleTurret2;
-    private boolean b2Pressable, bLast;
-    boolean armSequenceActive;
+    private DcMotor frontRight, frontLeft, backRight, backLeft, intake, turret1, turret2;
+    private Servo turnTurret, angleTurret0, angleTurret1;
+    public static double turnTurretLowerBound = 0;
+    public static double turnTurretUpperBound = 0.8;
+    private boolean b2Pressable, bLast, a2Pressable, aLast;
+    //private Servo arm, indexer;
+    /*boolean armSequenceActive;
     boolean armSequenceComplete;
     long sequenceStartTime = 0;
     int armSequenceStep = 0;
+     */
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,18 +49,33 @@ public class baseTele extends LinearOpMode {
 
         //INTAKE INIT
         intake = hardwareMap.get(DcMotor.class, "intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         b2Pressable = false;
         bLast = false;
 
+        /*
         //SPINNY THING INIT
         arm = hardwareMap.get(Servo.class, "arm");
         indexer = hardwareMap.get(Servo.class, "indexer");
+         */
 
         //TURRET INIT
-        turret = hardwareMap.get(DcMotor.class, "turret");
+        turret1 = hardwareMap.get(DcMotor.class, "turret1");
+        turret1.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret2 = hardwareMap.get(DcMotor.class, "turret2");
+        turret2.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turnTurret = hardwareMap.get(Servo.class, "turnTurret");
-        angleTurret1 = hardwareMap.get(Servo.class, "leftTurret");
-        angleTurret2 = hardwareMap.get(Servo.class, "rightTurret");
+        turnTurret.scaleRange(turnTurretLowerBound, turnTurretUpperBound);
+        turnTurret.setPosition(0.86);
+        angleTurret0 = hardwareMap.get(Servo.class, "angleTurret0");
+        angleTurret0.setPosition(0.2);
+        angleTurret1 = hardwareMap.get(Servo.class, "angleTurret1");
+        angleTurret1.setPosition(0.8);
+        a2Pressable = false;
+        aLast = false;
 
         waitForStart();
         follower.startTeleopDrive();
@@ -79,6 +99,7 @@ public class baseTele extends LinearOpMode {
             }
             bLast = gamepad1.b;
 
+            /*
             //SPINNY THING CONTROLS
             if (gamepad1.a && !armSequenceActive) {
                 armSequenceActive = true;
@@ -108,19 +129,60 @@ public class baseTele extends LinearOpMode {
                         break;
                 }
             }
+             */
             //TURRET CONTROLS
+            if (gamepad1.dpad_up) {
+                angleTurret0.setPosition(0);
+                telemetry.addData("Servo Position: ", angleTurret0.getPosition());
+                angleTurret1.setPosition(1);
+                telemetry.addData("Servo Position: ", angleTurret1.getPosition());
+                telemetry.update();
+            }
+            else if (gamepad1.dpad_right) {
+                angleTurret0.setPosition(0.1);
+                telemetry.addData("Servo Position: ", angleTurret0.getPosition());
+                angleTurret1.setPosition(0.9);
+                telemetry.addData("Servo Position: ", angleTurret1.getPosition());
+                telemetry.update();
+            }
+            else if (gamepad1.dpad_down) {
+                angleTurret0.setPosition(0.2);
+                telemetry.addData("Servo Position: ", angleTurret0.getPosition());
+                angleTurret1.setPosition(0.8);
+                telemetry.addData("Servo Position: ", angleTurret1.getPosition());
+                telemetry.update();
+            }
+            else if (gamepad1.dpad_left) {
+                angleTurret0.setPosition(0.25);
+                telemetry.addData("Servo Position: ", angleTurret0.getPosition());
+                angleTurret1.setPosition(0.75);
+                telemetry.addData("Servo Position: ", angleTurret1.getPosition());
+                telemetry.update();
+            }
+            if (gamepad1.a && !aLast) {
+                a2Pressable = !a2Pressable;
+            }
+            if (a2Pressable) {
+                turret1.setPower(1);
+                turret2.setPower(1);
+            }
+            else {
+                turret1.setPower(0);
+                turret2.setPower(0);
+            }
+            aLast = gamepad1.a;
 
             //TELEMETRY
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
             telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
             telemetry.addData("Intake Power", intake.getPower());
-            telemetry.addData("Arm Position", arm.getPosition());
-            telemetry.addData("Indexer Position", indexer.getPosition());
-            telemetry.addData("Turret Power", turret.getPower());
-            telemetry.addData("Horizontal Turret Angle", turnTurret.getPosition());
-            telemetry.addData("Vertical Turret Angle (1)", angleTurret1.getPosition());
-            telemetry.addData("Vertical Turret Angle (2)", angleTurret2.getPosition());
+            //telemetry.addData("Arm Position", arm.getPosition());
+            //telemetry.addData("Indexer Position", indexer.getPosition());
+            telemetry.addData("Turret Power", turret1.getPower());
+            telemetry.addData("Turret Rotation Position", turnTurret.getPosition());
+            telemetry.addData("Turret Angle (1)", angleTurret0.getPosition());
+            telemetry.addData("Turret Angle (2)", angleTurret1.getPosition());
 
             telemetry.update();
         }
